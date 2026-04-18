@@ -1,6 +1,6 @@
 FROM node:21-alpine3.19 as deps
 WORKDIR /repo/microservices/reservations-microservice
-COPY microservices/reservations-microservice/package.json microservices/reservations-microservice/package-lock.json ./
+COPY microservices/reservations-microservice/package.json microservices/reservations-microservice/package-lock.json* ./
 COPY packages/shared /repo/packages/shared
 RUN cd /repo/packages/shared && npm ci && npm run build
 RUN npm install
@@ -9,9 +9,9 @@ FROM node:21-alpine3.19 as build
 WORKDIR /repo/microservices/reservations-microservice
 COPY --from=deps /repo/microservices/reservations-microservice/node_modules ./node_modules
 COPY microservices/reservations-microservice/ .
+RUN npx prisma generate
 RUN npm run build
 RUN npm ci -f --only=production && npm cache clean --force
-RUN npx prisma generate
 
 FROM node:21-alpine3.19 as prod
 
